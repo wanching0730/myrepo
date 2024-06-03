@@ -26,7 +26,7 @@ ENV INSTANCE_NAME=hello
 ENV INSTANCE_HASH=cayenne
 
 # Ports that the application bind to
-EXPOSE ${APP_PORT}
+EXPOSE ${PORT}
 
 # Run
 ENTRYPOINT node main.js
