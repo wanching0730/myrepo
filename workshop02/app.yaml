@@ -2,37 +2,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bggdb-deploy-1
-  namespace: bggns
-  labels:
-    app: bgg
-    name: bggdb-deploy-1
-spec:
-  replicas: 1
-  selector:
-    matchLabels: # this means the pods with these labels belongs to this deployment
-      app: bgg
-      name: bggdb-pod
-  template:
-    # the pod template
-    metadata:
-      name: bggdb-pod
-      namespace: bggns
-      labels:
-        app: bgg
-        name: bggdb-pod
-    spec:
-      containers:
-      - name: bggdb-container
-        image: stackupiss/bgg-database:v1
-        imagePullPolicy: IfNotPresent
-        ports: 
-        - containerPort: 3306
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: bggapp-deploy-1
   namespace: bggns
   labels:
@@ -48,7 +17,7 @@ spec:
     # the pod template
     metadata:
       name: bggapp-pod
-      namespace: bggns
+      # namespace: bggns
       labels:
         app: bgg
         name: bggapp-pod
@@ -72,3 +41,23 @@ spec:
           httpGet:
             path: /healthz
             port: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bggapp-svc
+  namespace: bggns
+  labels:
+    app: bgg
+    name: bggapp-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: bgg
+    name: bggapp-pod
+  ports:
+  - protocol: TCP
+    port: 3000 # this is the port that the service listens on (service port)
+    targetPort: 3000 # this is the port that the service forwards to (container port)
+  
