@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dov-deployment
+  # generateName: dov-deployment- # this is a prefix for the name and can be used with 'k create' command
+  namespace: myns
+  labels:
+    app: dov
+    name: dov-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels: # this means the pods with these labels belongs to this deployment
+      app: dov
+      name: dov-po
+  template:
+    # the pod template
+    metadata:
+      name: dov-po
+      namespace: myns
+      labels:
+        app: dov
+        name: dov-po
+    spec:
+      containers:
+      - name: dov-container
+        image: chukmunnlee/cfdsa-dov-bear:v1.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: INSTANCE_NAME
+          value: hello
+        - name: INSTANCE_HASH
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        ports: 
+        - containerPort: 3000
+        livenessProbe: # health check
+          httpGet:
+            path: /healthz
+            port: 3000

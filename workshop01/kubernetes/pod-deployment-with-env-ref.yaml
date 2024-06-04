@@ -1,0 +1,86 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dov-config-map
+  namespace: myns
+  labels:
+    app: dov
+    name: dov-config-map
+data:
+  INSTANCE_NAME: name from config map
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dov-secret
+  namespace: myns
+  labels:
+    app: dov
+    name: dov-secret
+type: Opaque
+data:
+  INSTANCE_HASH: dGhpcyBpcyBteSBzZWNyZXQ= # must be a base64 encoded value
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dov-deployment
+  # generateName: dov-deployment- # this is a prefix for the name and can be used with 'k create' command
+  namespace: myns
+  labels:
+    app: dov
+    name: dov-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels: # this means the pods with these labels belongs to this deployment
+      app: dov
+      name: dov-po
+  template:
+    # the pod template
+    metadata:
+      name: dov-po
+      namespace: myns
+      labels:
+        app: dov
+        name: dov-po
+    spec:
+      containers:
+      - name: dov-container
+        image: chukmunnlee/cfdsa-dov-bear:v1.1
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: dov-config-map
+        - secretRef:
+            name: dov-secret
+        ports: 
+        - containerPort: 3000
+        livenessProbe: # health check
+          httpGet:
+            path: /healthz
+            port: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dov-service
+  namespace: myns
+  labels:
+    app: dov
+    name: dov-service
+spec:
+  type: ClusterIP
+  selector:
+    app: dov
+    name: dov-po
+  ports:
+  - name: dov-service-port
+    protocol: TCP
+    port: 8080 # this is the port that the service listens on (service port)
+    targetPort: 3000 # this is the port that the service forwards to (container port)
+  

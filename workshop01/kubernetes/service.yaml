@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dov-service
+  namespace: myns
+  labels:
+    app: dov
+    name: dov-service
+spec:
+  type: ClusterIP
+  selector:
+    app: dov
+    name: dov-po
+  ports:
+  - protocol: TCP
+    port: 8080 # this is the port that the service listens on (service port)
+    targetPort: 3000 # this is the port that the service forwards to (container port)
+  

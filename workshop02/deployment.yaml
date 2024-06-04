@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bggdb-deploy-1
+  namespace: bggns
+  labels:
+    app: bgg
+    name: bggdb-deploy-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # this means the pods with these labels belongs to this deployment
+      app: bgg
+      name: bggdb-pod
+  template:
+    # the pod template
+    metadata:
+      name: bggdb-pod
+      namespace: bggns
+      labels:
+        app: bgg
+        name: bggdb-pod
+    spec:
+      containers:
+      - name: bggdb-container
+        image: stackupiss/bgg-database:v1
+        imagePullPolicy: IfNotPresent
+        ports: 
+        - containerPort: 3306
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bggapp-deploy-1
+  namespace: bggns
+  labels:
+    app: bgg
+    name: bggapp-deploy-1
+spec:
+  replicas: 3
+  selector:
+    matchLabels: # this means the pods with these labels belongs to this deployment
+      app: bgg
+      name: bggapp-pod
+  template:
+    # the pod template
+    metadata:
+      name: bggapp-pod
+      namespace: bggns
+      labels:
+        app: bgg
+        name: bggapp-pod
+    spec:
+      containers:
+      - name: bggapp-container
+        image: stackupiss/bgg-backend:v1
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: bgg-cm
+        - secretRef:
+            name: bgg-secret
+        ports: 
+        - containerPort: 3000
+        livenessProbe: 
+          httpGet:
+            path: /healthz
+            port: 3000
+        readinessProbe: 
+          httpGet:
+            path: /healthz
+            port: 3000
