@@ -52,7 +52,8 @@ metadata:
     app: bgg
     name: bggapp-svc
 spec:
-  type: ClusterIP
+  type: NodePort # to access from outside using node external-ip:node-port
+  # type: LoadBalancer # load balancer
   selector:
     app: bgg
     name: bggapp-pod
