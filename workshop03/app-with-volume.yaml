@@ -22,6 +22,17 @@ spec:
         app: bgg
         name: bggapp-pod
     spec:
+      volumes:
+      # - name: myvolume
+      #   hostPath:
+      #     path: /tmp/mydir
+      #     type: DirectoryOrCreate
+      - name: cm-vol
+        configMap:
+          name: bgg-cm
+      - name: secret-vol
+        secret:
+          secretName: bgg-secret
       containers:
       - name: bggapp-container
         image: stackupiss/bgg-backend:v2
@@ -41,6 +52,11 @@ spec:
           httpGet:
             path: /healthz
             port: 3000
+        volumeMounts:
+        - name: cm-vol
+          mountPath: /opt/configMap
+        - name: secret-vol
+          mountPath: /opt/secret
 
 ---
 apiVersion: v1
