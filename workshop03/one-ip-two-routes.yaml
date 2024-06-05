@@ -1,0 +1,29 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dov-ingress
+  namespace: dovns
+  labels:
+    app: dov
+    name: dov-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: dov-bear.137.184.249.143.nip.io
+    http:
+      paths:
+      - path: /v1
+        pathType: Prefix
+        backend:
+          service:
+            name: dov-svc-v1
+            port:
+              number: 3000
+      - path: /v2
+        pathType: Prefix
+        backend:
+          service:
+            name: dov-svc-v2
+            port:
+              number: 3000
