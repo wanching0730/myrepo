@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: codeserver-cm
+  namespace: codeserverns
+  labels:
+    app: codeserver
+    name: codeserver-cm
+data:
+  TZ: Asia/Singapore
+  PROXY_DOMAIN: code-137.184.249.143.nip.io # ingress-nginx ip
+  DEFAULT_WORKSPACE: /config/workspace
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: codeserver-secret
+  namespace: codeserverns
+  labels:
+    app: codeserver
+    name: codeserver-secret
+type: Opaque
+data:
+  PASSWORD: cGFzc3dvcmQ= # password
+  SUDO_PASSWORD: cGFzc3dvcmQ=
