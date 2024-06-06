@@ -1,0 +1,110 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mysqlns
+  labels:
+    app: mysql
+    name: mysqlns
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-hsvc # headless service
+  namespace: mysqlns
+  labels:
+    app: mysql
+    name: mysql-hsvc
+spec:
+  clusterIP: None
+  selector:
+    app: mysql
+    name: mysql-pod
+  ports:
+  - port: 3306
+    targetPort: 3306
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-sts
+  namespace: mysqlns
+  labels:
+    app: mysql
+    name: mysql-sts
+spec:
+  serviceName: mysql-hsvc
+  replicas: 2 # 2 instances of mysql
+  selector:
+    matchLabels:
+      app: mysql
+      name: mysql-pod
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-pvc
+      labels:
+        app: mysql
+        name: mysql-pvc
+    spec:
+      storageClassName: do-block-storage
+      accessModes: [ "ReadWriteOncePod" ]
+      resources:
+        requests:
+          storage: 1Gi
+  template:
+    metadata:
+      labels:
+        app: mysql
+        name: mysql-pod
+    spec:
+      containers:
+      - name: mysql-container
+        image: mysql:8
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: changeit
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-pvc
+          mountPath: /var/lib/mysql
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: write-mysql-svc
+  namespace: mysqlns
+  labels:
+    app: mysql
+    name: write-mysql-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: mysql
+    name: mysql-pod
+    apps.kubernetest.io/pod-index: "0" # select the first node
+  ports:
+  - port: 3306
+    targetPort: 3306
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: read-mysql-svc
+  namespace: mysqlns
+  labels:
+    app: mysql
+    name: read-mysql-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: mysql
+    name: mysql-pod # select all the nodes
+  ports:
+  - port: 3306
+    targetPort: 3306

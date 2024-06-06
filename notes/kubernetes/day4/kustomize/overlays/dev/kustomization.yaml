@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+
+labels:
+- pairs: 
+    env: development
+  includeselectors: true
+  includetemplate: true
+
+nameprefix: dev-
+namespace: devns
+
+# overlay specific configuration
+replicas:
+- name: deployment-with-volume
+  count: 1
+
+images:
+- name: linuxserver/code-server:4.9.1
+  newname: test
+  newtag: v5
+
+configMapGenerator:
+- name: codeserver-cm
+  namespace: devns
+  behavior: create
+  literals:
+  - NAME=FRED
+  - EMAIL=fred@gmail.com
+
+secretGenerator:
+- name: codeserver-secret
+  namespace: devns
+  behavior: create
+  literals:
+  - NAME=FRED
+  - EMAIL=fred@gmail.com
+
+patches:
+- target:
+    appVersion: apps/v1
+    kind: Deployment
+    name: codeserver-deploy
+  patch: patch.yaml
+- path: delete-ingress.yaml
