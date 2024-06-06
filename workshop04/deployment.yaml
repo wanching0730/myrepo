@@ -67,16 +67,16 @@ spec:
         ports:
         - containerPort: 9000 # data port
         - containerPort: 9001 # console port
-        livenessProbe: 
-          httpGet:
-            path: /minio/health/live
-            port: 9000
-          initialDelaySeconds: 180
-        readinessProbe: 
-          httpGet:
-            path: /minio/health/ready
-            port: 9000
-          initialDelaySeconds: 180
+        # livenessProbe: 
+        #   httpGet:
+        #     path: /minio/health/live
+        #     port: 9000
+        #   initialDelaySeconds: 180
+        # readinessProbe: 
+        #   httpGet:
+        #     path: /minio/health/ready
+        #     port: 9000
+          # initialDelaySeconds: 180
         volumeMounts:
         - name: minio-pvc
           mountPath: /opt/data
@@ -95,7 +95,7 @@ metadata:
     app: minio
     name: minio-headful-svc 
 spec:
-  type: ClusterIp
+  type: ClusterIP
   selector:
     app: minio
     name: minio-pod
