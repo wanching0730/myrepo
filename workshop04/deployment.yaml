@@ -86,6 +86,28 @@ spec:
               memory: 250Mi
 
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-headful-svc 
+  namespace: minio-ns
+  labels:
+    app: minio
+    name: minio-headful-svc 
+spec:
+  type: ClusterIp
+  selector:
+    app: minio
+    name: minio-pod
+  ports:
+  - name: data
+    port: 9000
+    targetPort: 9000
+  - name: console
+    port: 9001
+    targetPort: 9001
+
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -104,7 +126,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: minio-svc
+            name: minio-headful-svc 
             port:
               number: 9001
   - host: data-137.184.249.143.nip.io
@@ -114,6 +136,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: minio-svc
+            name: minio-headful-svc 
             port:
               number: 9000
